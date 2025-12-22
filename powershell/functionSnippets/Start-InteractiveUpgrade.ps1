@@ -41,3 +41,5 @@ function Start-InteractiveUpgrade {
         Write-Host "❌ Failed to launch interactive upgrade task: $_" -ForegroundColor Red
     }
 }
+
+Export-ModuleMember -Function Start-InteractiveUpgrade
