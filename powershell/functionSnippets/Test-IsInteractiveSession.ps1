@@ -25,3 +25,5 @@ function Test-IsInteractiveSession {
         return $false
     }
 }
+
+Export-ModuleMember -Function Test-IsInteractiveSession
