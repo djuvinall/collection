@@ -29,3 +29,5 @@ function Move-SymbolicTarget {
     New-Item -ItemType SymbolicLink -Path $source -Target $target
 
 }
+
+Export-ModuleMember -Function Move-SymbolicTarget
