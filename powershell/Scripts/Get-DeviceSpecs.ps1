@@ -1,4 +1,4 @@
-# Collect Computer Specs
+  # Collect Computer Specs
 
 $finalSpecs = [PSCustomObject]@{
   Motherboard = $null
@@ -28,3 +28,10 @@ $finalSpecs.Storage = $storage
 $finalSpecs | ConvertTo-Json | Out-File -FilePath "$PSScriptRoot\Specs.json" -Encoding UTF8
 
 Write-Host "Computer specifications collected and saved to $PSScriptRoot\Specs.json" -ForegroundColor Green
+
+
+
+#### TO DO ####
+# Need to modularize this and turn it into a function
+# It will need to return a rich powershell object
+# If a user wants to print the results it can be done outside of the function
