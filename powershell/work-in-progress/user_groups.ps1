@@ -1,17 +1,34 @@
-$username = Read-Host "Username without domain (i.e. 'jdoe')"
+function Get-UserGroups {
+  param (
+      [string]$username
+  )
 
-$output_path = "C:\temp\user_groups\{0}_groups.txt" -f $username
-$user_group_dir = "C:\temp\user_groups"
+  # Remove @domain.com if user inputs email address
+  if ($username -like "*@*") {
+      $username = $username.Split("@")[0]
+  }
 
-if (-not(Test-Path $user_group_dir)) {New-Item -Path $user_group_dir -ItemType Directory}
+  # Test that the user exists in AD
+  try {
+    $u = get-aduser $username
+    if ($null -eq $u) {
+        throw "User does not exist"
+    }
+  } 
+  catch {
+      throw "User $username does not exist in Active Directory"
+  }
 
-#Test is user exists, if not, displays a message that the wrong username was typed and re-runs the script
-try {
-get-aduser $username
-} catch {
-Write-Host "User does not exist, Please verify Username and try agian"
-Invoke-Expression -Command ($PSCommandPath)
+  # Initialize output object
+  $output_Object = [PSCustomObject]@{
+      Username = $username
+      Groups = [PSCustomObject]@{
+      }
+  }
+
+  # Build Output Object and return
+  $groups = Get-ADPrincipalGroupMembership $username | Select-Object Name
+  $output_Object.Groups = $groups
+  return $output_Object
+
 }
-
-Get-ADPrincipalGroupMembership $username | Select-Object name > $output_path
-Write-host "$username groups sucessgully printed to file"
