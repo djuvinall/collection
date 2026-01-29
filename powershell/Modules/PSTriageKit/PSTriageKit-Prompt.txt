@@ -1,0 +1,135 @@
+Build a PowerShell module named `PSTriageKit` implementing a local incident-response triage collector with obfuscated-at-rest JSON artifacts, plus a reader/query UX.
+
+Implement public commands:
+- `Invoke-TriageCollection`
+- `Get-TriageCollection`
+- `Get-TriageData`
+- `Export-TriageData`
+- `Show-TriageSummary`
+- `Find-TriageData`
+- `Get-TriageCollector`
+- `Test-TriagePrereq`
+- `New-TriageProfile`
+
+Core requirements
+- Collectors must be pluggable (`Collectors/*.ps1`) and return PowerShell objects; the core engine serializes + packages them into binary `.ptk` files under `Collectors/`.
+- Artifacts are JSON logically but stored obfuscated:
+  - `-Protect Compress` (default): UTF-8 JSON -> GZip -> payload bytes
+  - `-Protect Password`: UTF-8 JSON -> GZip -> AES-256-CBC encrypt + HMAC-SHA256 authenticate (PowerShell 5.1 compatible), with PBKDF2-HMACSHA256 key derivation (salt 16 bytes, iterations ~200k). Wrong password must fail authentication (HMAC check) with a clear error.
+- Define PTK file format:
+  - Magic (8 bytes ASCII): `PSTKPTK1`
+  - HeaderLength (UInt32 LE)
+  - HeaderJson (UTF-8 JSON, length = HeaderLength)
+  - PayloadBytes (remainder)
+- Header JSON fields:
+  - `version` = 1
+  - `collector` (string)
+  - `createdUtc` (ISO8601)
+  - `protect` = `Compress` or `Password`
+  - `contentType` = `application/json`
+  - `encoding` = `utf-8`
+  - `compression` = `gzip`
+  - If `protect=Password`:
+    - `kdf` = `PBKDF2-HMACSHA256`
+    - `iterations` (int)
+    - `saltB64` (base64 16 bytes)
+    - `cipher` = `AES-256-CBC`
+    - `ivB64` (base64 16 bytes)
+    - `mac` = `HMAC-SHA256`
+    - `macB64` (base64 hmac over `headerJsonBytes + payloadBytes` using macKey)
+- Password mode key derivation:
+  - Accept `-Password` as `SecureString`
+  - Derive 64 bytes via PBKDF2 (Rfc2898DeriveBytes): first 32 = encKey, last 32 = macKey
+
+Bundle output
+- A timestamped output folder (default `./triage-<COMPUTERNAME>-<yyyyMMdd-HHmmss>`) containing:
+  - `index.json` (plain, minimal discovery; includes tool version, host, timestamps, protect mode, collectors run/skipped with reasons, list of `.ptk` files + sha256)
+  - `run.log.jsonl` (plain structured logs; never log secrets/password)
+  - `hashes.sha256` (sha256 of every file in the bundle)
+  - `Collectors/<CollectorName>.ptk` for each collector
+- Optional `-Zip` to zip the bundle as-is.
+
+`Invoke-TriageCollection`
+- Params:
+  - `-OutputPath <path>` default as above
+  - `-Profile <name|path>` default `default`
+  - `-Collectors <string[]>` include list (optional)
+  - `-ExcludeCollectors <string[]>` exclude list (optional)
+  - `-SinceHours <int>` default 24 (for event logs)
+  - `-Protect Compress|Password` default `Compress`
+  - `-Password <SecureString>` required if `-Protect Password`
+  - `-Zip` (switch)
+  - `-Force` (switch)
+- Behavior:
+  - Runs collectors, packages outputs to `.ptk`, writes index/log/hashes, returns a structured summary object.
+
+`Get-TriageCollection -Path <folder|zip>`
+- Loads `index.json` and exposes a collection object (path, metadata, file list, protect mode).
+- If a zip is passed, implement either extraction to a temp folder with a disposable handle, or an explicit `-ExtractPath`; document and test your choice.
+
+`Get-TriageData`
+- Params:
+  - `-Collection <obj>` OR `-Path <folder|zip>`
+  - `-Collector <name>` (optional), `-All` (switch)
+  - `-Password <SecureString>` (required when reading password-protected `.ptk`)
+  - Optional `-AsHashtable`
+- Unpacks `.ptk` -> returns PowerShell objects.
+
+`Export-TriageData`
+- Exports decrypted/decompressed data to readable files.
+- Params: `-Collection`, `-Collector`, `-Path`, `-Format Json|Csv`, plus password handling when needed.
+
+`Show-TriageSummary`
+- Produces a "laid out in front of them" summary view using unpacked objects (OS, uptime, local admins, key service/task highlights, recent critical events, etc.). Keep it fast and resilient.
+
+`Find-TriageData` (new feature)
+- Goal: quick querying across unpacked collector objects and return results in a user-friendly table-ready shape.
+- Requirements:
+  - Params:
+    - `-Collection <obj>` OR `-Path <folder|zip>`
+    - `-Query <string>` (simple expression language)
+    - `-Collector <string[]>` (optional filter)
+    - `-Password <SecureString>` (if needed)
+    - `-Limit <int>` default 200
+    - `-IncludeRaw` (switch) include the full matched object
+  - Provide a small, documented query language (no external deps), e.g.:
+    - `Collector=Processes Where Name~"powershell" | Select Name,Id,Path`
+    - `Where EventId in (4625,4688) and Level="Error"`
+    - Support operators: `=`, `!=`, `~` (contains/regex), `in (...)`, `and/or`, parentheses (optional minimal).
+  - Implement safely without `Invoke-Expression`. Parse the query into an AST or a constrained evaluator.
+  - Output objects should include: `Collector`, `Path` (logical property path if applicable), `Match` (selected fields), and optionally `Raw`.
+  - Include examples in comment-based help and ensure it works with pipeline (`Find-TriageData ... | Format-Table`).
+
+Collectors (MVP)
+- `SystemInfo`, `UsersAndGroups`, `Processes`, `Services`, `ScheduledTasks`, `Networking`, `Firewall`, `EventLogs` (System/Application always; Security only if admin; skip gracefully with reason recorded), `DefenderStatus` (if available), `AutorunsLite` (Run keys + startup folders, read-only).
+
+General
+- Must be safe/read-only. Never modify system state.
+- Must run without admin: skip privileged collectors gracefully and record skip reasons in `index.json` and logs.
+- No external dependencies besides built-in Windows/PowerShell and Pester. Prefer compatibility with Windows PowerShell 5.1 and PowerShell 7+.
+- Robust error handling; structured logs; deterministic-ish JSON serialization settings (depth, stable ordering as feasible).
+
+Tests (Pester)
+- PTK pack/unpack roundtrip (Compress)
+- PTK pack/unpack roundtrip (Password) with correct password
+- Wrong password fails authentication
+- `Invoke-TriageCollection` produces expected bundle files and `.ptk` outputs
+- `Get-TriageCollection` + `Get-TriageData` returns objects
+- Include/exclude collector selection works
+- Non-admin run records skipped collectors with reasons
+- `Find-TriageData`:
+  - rejects unsafe/invalid queries
+  - returns expected matches for a known small synthetic collection (create a tiny in-test `.ptk` fixture using the packer)
+
+Provide exact run commands
+- Collection (no password):
+  - `Invoke-TriageCollection -OutputPath .\out -Protect Compress -Zip`
+- Collection (password):
+  - `$pw = Read-Host -AsSecureString`
+  - `Invoke-TriageCollection -OutputPath .\out -Protect Password -Password $pw -Zip`
+- Read/query:
+  - `$c = Get-TriageCollection -Path .\out`
+  - `Show-TriageSummary -Collection $c`
+  - `Find-TriageData -Collection $c -Query 'Collector=Processes Where Name~"powershell"' -Limit 50`
+- Tests:
+  - `Invoke-Pester -Path .\tests`
