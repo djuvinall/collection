@@ -1,5 +1,5 @@
 function Get-MyPublicIP {
-  (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
+  (Invoke-RestMethod -Uri "ipinfo.io").ip
 }
 
 Export-Module -Function Get-MyPublicIP
