@@ -56,4 +56,4 @@ function Get-ComputerCPU {
     }
 }
 
-Export-Module -Function Get-ComputerCP
+Export-Module -Function Get-ComputerCPU
