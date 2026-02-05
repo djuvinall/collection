@@ -34,4 +34,4 @@ Write-Host "Computer specifications collected and saved to $PSScriptRoot\Specs.j
 #### TO DO ####
 # Need to modularize this and turn it into a function
 # It will need to return a rich powershell object
-# If a user wants to print the results it can be done outside of the function
+# Need to convert the WMI calls to CMI calls
