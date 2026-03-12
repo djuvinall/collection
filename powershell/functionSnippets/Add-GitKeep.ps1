@@ -57,5 +57,3 @@ function Add-GitKeep {
         "Skipped"= $skipped
     }
 }
-
-Export-ModuleMember -Function Add-GitKeep

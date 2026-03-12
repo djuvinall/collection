@@ -70,5 +70,3 @@ function Get-DeNestedObject {
         }
     }
 }
-
-Export-ModuleMember -Function Get-DeNestedObject

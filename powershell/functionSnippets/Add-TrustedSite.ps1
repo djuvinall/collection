@@ -60,5 +60,3 @@ function Add-TrustedSite {
         New-ItemProperty -Path $path -Name "*" -Value $zoneMap -PropertyType DWord -Force | Out-Null
     }
 }
-
-Export-ModuleMember -Function Add-TrustedSite   

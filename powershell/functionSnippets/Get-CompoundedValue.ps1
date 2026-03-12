@@ -15,5 +15,3 @@ function Get-CompoundedValue {
   $factor = [decimal][math]::Pow([double](1 + $Rate), $Period)
   $Principal * $factor
 }
-
-Export-ModuleMember -Function Get-CompoundedValue 

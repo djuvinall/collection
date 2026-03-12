@@ -10,5 +10,3 @@ function Get-SearchMsUncPath {
   $crumb = [uri]::UnescapeDataString($encoded)
   if ($crumb -like 'location:*') { $crumb.Substring('location:'.Length) } else { $crumb }
 }
-
-Export-ModuleMember -function Get-SearchMsUncPath

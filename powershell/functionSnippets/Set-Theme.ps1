@@ -43,5 +43,3 @@ function Set-Theme {
         ## There is an error received that access is denied when stopping the explorer process but the process restarts anyways.
         ## Once the Process is restarted, a new file explorer window pops up, likely due ot the Start-Process explorer command
 }
-
-Export-ModuleMember -Function Set-Theme
