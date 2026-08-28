@@ -1,0 +1,33 @@
+# Make line-ending handling a property of the repo rather than of each clone's
+# git config. Without this, behavior depends on core.autocrlf and on which
+# platform's git reads the working tree.
+
+# Let git decide text vs binary by default.
+* text=auto
+
+# Windows PowerShell 5.1 is the target. Pin CRLF so scripts are correct
+# regardless of where they're checked out or edited.
+*.ps1   text eol=crlf
+*.psm1  text eol=crlf
+*.psd1  text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Cross-platform text: LF.
+*.md    text eol=lf
+*.css   text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+.gitignore     text eol=lf
+.gitattributes text eol=lf
+
+# Binaries — never normalize.
+*.iso   binary
+*.msi   binary
+*.png   binary
+*.jpg   binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary

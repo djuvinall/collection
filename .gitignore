@@ -1,0 +1,72 @@
+# --- Windows shell cruft ---
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+
+# --- Editors / IDEs ---
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.user
+*~
+*.swp
+
+# --- PowerShell ---
+# PSScriptAnalyzer / Pester output, if either is ever added
+TestResults*.xml
+*.tests.xml
+coverage.xml
+# Local module installs, if a script ever vendors one
+Modules/**/[0-9]*.[0-9]*.[0-9]*/
+
+# --- Script output ---
+# Nothing here should ever commit its own results
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+output/
+out/
+logs/
+
+# --- Large binaries these scripts can produce ---
+# Download-Windows11ISO.ps1 writes an ISO; never let one land in the repo
+*.iso
+*.msi
+*.msp
+*.wim
+*.esd
+*.zip
+*.7z
+
+# --- Secrets: this repo is PUBLIC. Belt and braces. ---
+# Nothing sensitive should reach a file in the first place, but if it does,
+# it should not be one command away from a public commit.
+*.pfx
+*.p12
+*.key
+*.pem
+*.cer
+*.crt
+credentials.xml
+*credential*.xml
+*.clixml
+secrets.*
+.env
+.env.*
+appsettings.*.json
+
+# --- Personal / local-only ---
+local/
+scratch/
+_local.*
