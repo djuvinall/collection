@@ -47,6 +47,7 @@ tell at a glance whether it's safe to run on a live machine.
 collection/
 ├── css/                  Firefox userChrome customization
 ├── docs/arch/            System-surface detail, one file per area
+├── palettes/             Color palettes / themes (JSON)
 ├── powershell/
 │   ├── Modules/          Reusable functions, grouped by domain (git, math, strings, utils)
 │   ├── Scripts/          Standalone runnable scripts

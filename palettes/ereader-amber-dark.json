@@ -1,0 +1,16 @@
+{
+  "name": "ereader-amber-dark",
+  "source": "10775.jpg — 1080x2340",
+  "sampled": {
+    "void":   { "hex": "#000000", "rgb": [0, 0, 0],       "role": "page background (pure black, ~85% of pixels)" },
+    "copper": { "hex": "#CB8643", "rgb": [203, 134, 67],  "role": "body text" },
+    "ember":  { "hex": "#F2AA67", "rgb": [242, 170, 103], "role": "reader chrome / footer UI — brighter than body" },
+    "clay":   { "hex": "#B68B61", "rgb": [182, 139, 97],  "role": "anti-alias midtone — good as secondary text" },
+    "umber":  { "hex": "#C4874E", "rgb": [196, 135, 78],  "role": "warm edge tone — good as label/eyebrow color" }
+  },
+  "derived": {
+    "panel": { "hex": "#0A0704", "role": "inline code / raised surface" },
+    "rule":  { "rgba": "rgba(203,134,67,0.20)", "role": "hairline dividers" },
+    "ruleHi":{ "rgba": "rgba(242,170,103,0.42)", "role": "emphasis dividers, links" }
+  }
+}

@@ -9,6 +9,7 @@ Released into the public domain under [The Unlicense](LICENSE).
 ```
 collection/
 ├── css/                  Firefox UserChrome customization
+├── palettes/             Color palettes / themes (JSON)
 ├── powershell/
 │   ├── Modules/          Reusable function libraries (git, math, strings, utils)
 │   ├── Scripts/          Standalone scripts
@@ -119,6 +120,15 @@ Incomplete or experimental. Treat everything here as unfinished.
 | File | Description |
 |---|---|
 | [`css/UserChrome.css`](css/UserChrome.css) | Firefox `userChrome.css` that hides the native tab bar and adjusts nav-bar margins. Drop into the Firefox profile's `chrome/` folder and enable `toolkit.legacyUserProfileCustomizations.stylesheets` in `about:config`. |
+
+## Palettes
+
+Color palettes / themes, stored as JSON — either sampled from real sources or hand-designed for UI use.
+
+| File | Description |
+|---|---|
+| [`palettes/ereader-amber-dark.json`](palettes/ereader-amber-dark.json) | Amber-on-black palette sampled from an e-reader screenshot (10775.jpg, 1080x2340). Body text / chrome / secondary / label tones, plus derived panel and rule colors. |
+| [`palettes/kosh-dark.json`](palettes/kosh-dark.json) | Dark navy/blue-toned UI palette — primary/surface/text/border/status color groups. |
 
 ## Test
 

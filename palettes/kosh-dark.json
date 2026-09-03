@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "name": "Kosh Dark",
+    "version": "1.0.0",
+    "theme": "dark",
+    "description": "Dark navy/blue-toned UI palette"
+  },
+  "colors": {
+    "primary": {
+      "base":    "#0052A3",
+      "light":   "#0066CC",
+      "lighter": "#1E90FF"
+    },
+    "surface": {
+      "background": "#0F1419",
+      "base":       "#1A2332",
+      "elevated":   "#232E42"
+    },
+    "text": {
+      "primary":   "#E8EAED",
+      "secondary": "#9CA3AF",
+      "tertiary":  "#6B7280"
+    },
+    "border": {
+      "default": "#2D3748"
+    },
+    "status": {
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "error":   "#EF4444"
+    }
+  }
+}
