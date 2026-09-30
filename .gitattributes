@@ -22,6 +22,10 @@
 .gitignore     text eol=lf
 .gitattributes text eol=lf
 
+# Git hooks are extensionless POSIX sh scripts. With core.autocrlf=true a Windows clone
+# would check them out CRLF, and sh then fails on the '\r' in every line.
+.githooks/*    text eol=lf
+
 # Binaries — never normalize.
 *.iso   binary
 *.msi   binary

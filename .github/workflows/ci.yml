@@ -1,0 +1,71 @@
+# CI that spends minutes on purpose.
+#
+# Installed by project:initialization as .github/workflows/ci.yml. Fill the one marked
+# step from the repo's CLAUDE.md "Verification" section; change nothing else without
+# reading why it is there.
+#
+# WHEN IT RUNS -- only on a pull request that carries the `ci` label and is not a draft.
+# Pushing to a branch runs nothing. Opening a PR runs nothing. Merging runs nothing:
+# the PR already passed, and a post-merge rerun of the same tree is the single biggest
+# waste on a repo where agents push often. project:wrap-up adds `ci` when it marks a PR
+# ready AND the diff touches the paths listed under CI in CLAUDE.md; add or remove the
+# label by hand to override. Run it anyway from the Actions tab (workflow_dispatch).
+#
+# WHY A JOB-LEVEL `if:` AND NOT A TRIGGER-LEVEL FILTER -- a workflow skipped by its
+# trigger never reports, so a check that is ever made required hangs at "Expected --
+# waiting for status" forever. A job skipped by `if:` reports as skipped and consumes
+# no runner minutes.
+
+name: ci
+
+on:
+  pull_request:
+    types: [labeled, synchronize, ready_for_review, reopened]
+  workflow_dispatch:
+
+# One run per PR. A new push cancels the run it made obsolete.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.draft == false &&
+       contains(github.event.pull_request.labels.*.name, 'ci'))
+    # Windows, not ubuntu: the target is Windows PowerShell 5.1, which only exists on Windows
+    # runners. pwsh 7's parser accepts files 5.1 rejects (PS7 syntax, BOM-less UTF-8), so a
+    # Linux run would pass exactly the breakage this gate exists to catch.
+    runs-on: windows-latest
+    # The default job timeout is 360 minutes. A hung job on a private repo spends the
+    # month's quota in an afternoon.
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Fill from CLAUDE.md "Verification". Add setup-* steps only if needed. ---
+      - name: Verify
+        # Parse-check every PowerShell file under Windows PowerShell 5.1. Files declaring
+        # `#Requires -Version 7` are checked by pwsh instead.
+        shell: powershell
+        run: |
+          $failed = 0
+          Get-ChildItem -Recurse -Include *.ps1,*.psm1 | ForEach-Object {
+              $ps7 = Select-String -Path $_.FullName -Pattern '^#Requires\s+-Version\s+7' -Quiet
+              if ($ps7) {
+                  $out = pwsh -NoProfile -Command "`$e=`$null; [void][System.Management.Automation.Language.Parser]::ParseFile('$($_.FullName)', [ref]`$null, [ref]`$e); `$e.Count"
+                  $count = [int]$out
+              } else {
+                  $e = $null
+                  [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$e)
+                  $count = $e.Count
+                  foreach ($x in $e) { Write-Host "::error file=$($_.FullName),line=$($x.Extent.StartLineNumber)::$($x.Message)" }
+              }
+              if ($count) { $failed++; Write-Host "$($_.FullName): $count parse error(s)" }
+          }
+          if ($failed) { Write-Host "$failed file(s) failed to parse"; exit 1 }
+          Write-Host "All PowerShell files parse."
