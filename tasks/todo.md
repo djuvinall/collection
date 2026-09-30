@@ -7,13 +7,8 @@ source, not aspirational cleanup.
 
 ## In flight
 
-- [ ] **`git pull` — the local checkout is 1 commit behind `origin/Version-0.00`.** Missing commit
-      `681a7fb` "Add HAR to CSV conversion script", which adds `python/convert-har_to_csv.py`.
-      **These docs were written against the stale local state and describe no Python at all.**
-      After pulling: decide whether `python/` gets a `docs/arch/python.md`, and update
-      `CLAUDE.md`'s stack + layout sections. Done = docs match `origin`.
-- [ ] Rename `CSS/` → `css/` in git and commit — staged by the audit as a pure rename, needs your
-      commit. Fixes the 404 on the README's `css/UserChrome.css` link on GitHub.
+- [ ] Decide whether `python/` gets a `docs/arch/python.md`, and catalogue
+      `python/convert-har_to_csv.py` in `README.md`. (The pull that brought it in is done.)
 
 ## Next
 
@@ -81,13 +76,14 @@ source, not aspirational cleanup.
 
 ## Blocked
 
-- [ ] Verify whether `git status` is actually clean on your Windows machine — blocked by: needs to
-      be run by you. The audit ran git from a Linux sandbox and saw all 29 files as modified with a
-      pure CRLF↔LF diff (2494 insertions / 2494 deletions, zero content change). That's most likely
-      a sandbox artifact of `core.autocrlf=true`, not a real repo problem. The new `.gitattributes`
-      should make this deterministic going forward, but confirm before trusting it.
-
 ## Done (recent)
+
+- [x] GitHub layer installed (hooks, label-gated CI, PR/issue templates, labels, rebase-only
+      merges); default branch renamed `Version-0.00` → `main` — 2026-09-29
+- [x] `git status` verified clean on Windows; the index is all LF. The CRLF↔LF noise was a
+      Linux-sandbox artifact, as suspected — 2026-09-29
+- [x] Pulled `681a7fb` (Python HAR → CSV script) — merged in `cee2ada`
+- [x] `CSS/` → `css/` rename committed in `1279748`
 
 - [x] Initial project context layer: `CLAUDE.md`, `ARCHITECTURE.md`, `docs/arch/`, `tasks/`,
       `decisions.md`, `glossary.md`, `.gitignore`, `.gitattributes` — 2026-08-09

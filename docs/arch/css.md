@@ -63,6 +63,6 @@ Two rules against Firefox's internal chrome DOM:
 
 Requires a Firefox restart to take effect — this is startup-time chrome, not hot-reloaded.
 
-**Case-sensitivity caveat on the folder itself:** git tracked this directory as `CSS/` while
-`README.md` links to `css/`. Windows resolves both, but GitHub's web UI does not, so the README
-link 404s. Being corrected — see `decisions.md`.
+**Case-sensitivity history of the folder itself:** git once tracked this directory as `CSS/` while
+`README.md` linked to `css/`, which 404'd on GitHub. Renamed to `css/` in `1279748` — see
+`decisions.md`.
