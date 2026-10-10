@@ -3,13 +3,15 @@
 **Responsibility:** reusable functions, grouped by domain. These are the files intended to be
 dot-sourced into a session and called, as opposed to run once to do a job.
 
-Four domain folders: `git/`, `math/`, `strings/`, `utils/`. `utils/` is the catch-all and holds
+Five domain folders: `ai/`, `git/`, `math/`, `strings/`, `utils/`. `utils/` is the catch-all and holds
 everything with a system surface.
 
 ## Public interface
 
-One function per file, filename matching the function name — with one exception. `SymbolicLinks.psm1`
-is a real module and explicitly exports three functions:
+One function per file, filename matching the function name — with two exceptions, both real modules
+with an `Export-ModuleMember` contract. `ai/OllamaChat.psm1` exports 13 functions (plus the
+`OllamaSession` class, reachable from callers only via `using module`). `SymbolicLinks.psm1`
+explicitly exports three functions:
 
 ```powershell
 Export-ModuleMember -Function Move-SymbolicTarget, Get-SymbolicLinkTarget, Test-SymbolicLink
@@ -40,6 +42,7 @@ Get-FileTypeCount -Path C:\Temp
 |---|---|---|
 | `utils/Get-FolderStructure` | Filesystem tree | Returns rendered ASCII text, not objects. Optional file inclusion. |
 | `utils/Get-FileTypeCount` | Filesystem tree | Per-extension stats: count, total/avg size, date range, % of total. |
+| `ai/OllamaChat.psm1` | Ollama REST API at `$env:OLLAMA_HOST` (read once, at import) or `http://127.0.0.1:11434`; local files passed to `-ImagePath` | **Network egress, plain HTTP by default.** Uploads prompt history and image file bytes to the server. `Stop-OllamaModel` unloads a model on the *server* (`SupportsShouldProcess`) — remote state, not destructive. **PS 7.4+.** |
 | `utils/Get-MyPublicIP` | `https://ipinfo.io` | **Network egress.** Discloses your IP to a third party. No error handling — throws on no connectivity. |
 | `utils/BrowserExtensionsAudit` | CIM `Win32_UserProfile`; per-profile Chrome/Edge `User Data` dirs | **Needs elevation** to read profiles other than the current user's. Output names third-party software per user — scrub before sharing. |
 | `utils/Test-Credential` | `-Method StartProcess` (**default**) → `System.Diagnostics.ProcessStartInfo`, local. `-Method ActiveDirectory` → `System.DirectoryServices.DirectoryEntry`, binds a DC. | **Handles credentials.** Failed attempts count toward lockout policy; failed AD binds are auditable auth events. Derived from claudiospizzi/SecurityFever. |
@@ -62,7 +65,8 @@ Get-FileTypeCount -Path C:\Temp
 ## Data crossing the boundary
 
 **In:** paths, strings, numbers, `PSCredential` objects. Nothing reads from a config file or
-environment variable — every input is an explicit parameter.
+environment variable — every input is an explicit parameter. One exception: `ai/OllamaChat.psm1`
+reads `$env:OLLAMA_HOST` once at import for its default server.
 
 **Out:** objects, except `Get-FolderStructure` (rendered text) and `Start-Stopwatch` (console
 writes). `BrowserExtensionsAudit` emits structured output shaped for IT inventory ingestion —
@@ -70,7 +74,8 @@ it was written with ConnectWise ASIO in mind.
 
 ## Depends on
 
-Nothing outside a stock Windows PowerShell 5.1 install. No RSAT, no external modules, no
+Nothing outside a stock Windows PowerShell 5.1 install — except `ai/OllamaChat.psm1`, which needs
+PowerShell 7.4+ and a reachable Ollama server. No RSAT, no external modules, no
 PSGallery packages. This is worth preserving — it's what makes these safe to paste into an
 unfamiliar machine's console.
 
@@ -80,7 +85,7 @@ unfamiliar machine's console.
   mechanism there is; breaking this makes functions unfindable.
 - **Tier-0 and Tier-1 functions must stay side-effect free.** `utils/` is the only folder where a
   system surface is expected. A registry write appearing in `strings/` would be a design break.
-- **`SymbolicLinks.psm1`'s export list is the contract.** Functions not in `Export-ModuleMember`
+- **Each `.psm1`'s export list is the contract** (`SymbolicLinks.psm1`, `ai/OllamaChat.psm1`). Functions not in `Export-ModuleMember`
   are private — adding a function without exporting it makes it unreachable via `Import-Module`.
 - **No self-elevation.** Scripts fail on insufficient privilege rather than prompting for UAC.
 

@@ -78,6 +78,8 @@ source, not aspirational cleanup.
 
 ## Done (recent)
 
+- [x] **Added `Modules/ai/OllamaChat.psm1`** — 2026-10-09. Audited; quick fixes applied; the rest
+      filed as #18–#26.
 - [x] GitHub layer installed (hooks, label-gated CI, PR/issue templates, labels, rebase-only
       merges); default branch renamed `Version-0.00` → `main` — 2026-09-29
 - [x] `git status` verified clean on Windows; the index is all LF. The CRLF↔LF noise was a

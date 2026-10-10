@@ -6,6 +6,27 @@ reasoning gets overruled by the next plausible-sounding idea.
 Seeded 2026-08-09 from the initial audit. These three are derived from defects found in the source,
 so they're real mistakes that were actually made here, not generic PowerShell advice.
 
+## 2026-10-09 — One-line `<# .SYNOPSIS text #>` is not comment-based help
+
+**What happened:** `OllamaChat.psm1` documented 8 functions as `<# .SYNOPSIS Returns the server
+version. #>`. `Get-Help` showed only the syntax block for all of them, and PSScriptAnalyzer
+reported `PSProvideCommentHelp`. The help looked present when you read the source and was
+invisible at the console.
+
+**Why:** a help keyword has to sit on its own line, with its content on the lines below. With the
+text on the same line, the block isn't parsed as help at all, and there's no warning.
+
+**Do instead:** keyword on its own line, text below:
+
+```powershell
+<#
+.SYNOPSIS
+    Returns the server version.
+#>
+```
+
+Verify with `(Get-Help <Name>).Synopsis`. If it echoes the syntax line, the help didn't parse.
+
 ## 2026-09-29 — A pwsh 7 parse check is not a 5.1 gate
 
 **What happened:** the documented verification gate, run in pwsh 7, reported every file clean.

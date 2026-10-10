@@ -8,6 +8,28 @@ the reasoning is inferred rather than stated in the commit message, it says so.
 
 ---
 
+## 2026-10-09 — OllamaChat lands as a module under a new `ai/` domain; graduation deferred to #18
+
+**Context:** `OllamaChat.psm1` (an Ollama REST client) was added from outside the repo. At ~520
+lines it is bigger than anything else in `Modules/`, and its natural next step, an automatic
+tool-call loop with tests, is the kind of growth that sent PSTriageKit and System-Inventory to
+their own repos (2026-03-12).
+
+**Decision:** keep it here for now, as one self-contained `.psm1` under a new
+`powershell/Modules/ai/` domain folder. Whether it graduates is decided in #18, before the
+tool-call loop (#19) is built. #19 is blocked on #18.
+
+**Rejected — put it under `utils/`.** `utils/` is the established catch-all and already holds
+other network-egress code (`Get-MyPublicIP`), so it would have avoided a new folder. It lost
+because an Ollama client isn't a system utility, and AI tooling is likely to grow into more files
+here.
+
+**Consequence:** `Modules/` now has five domains, and two `.psm1` files with an export contract.
+The module's default server is Ollama's own (`127.0.0.1:11434`), not a homelab address. Point it
+at a real server with `$env:OLLAMA_HOST`.
+
+---
+
 ## 2026-09-29 — Default branch renamed `Version-0.00` → `main`; work moves to issues and PRs
 
 **Context:** every change so far was committed straight to `Version-0.00`, a name that implied a
