@@ -21,7 +21,7 @@ answers *"what does it touch, what does it need, and what happens if it goes wro
 
 | Area | Highest tier | System surface | Detail |
 |---|---|---|---|
-| `powershell/Modules/` | 3 | HKCU registry, Windows Installer COM, filesystem links, AD/local auth, HTTP egress | [docs/arch/modules.md](docs/arch/modules.md) |
+| `powershell/Modules/` | 3 | HKCU registry, Windows Installer COM, filesystem links, AD/local auth, HTTP egress (incl. Ollama API) | [docs/arch/modules.md](docs/arch/modules.md) |
 | `powershell/Scripts/` | 3 | winget, HTTP egress, background jobs | [docs/arch/scripts.md](docs/arch/scripts.md) |
 | `powershell/functionSnippets/` | 3 | Task Scheduler (as SYSTEM), RSAT DhcpServer | [docs/arch/function-snippets.md](docs/arch/function-snippets.md) |
 | `powershell/work-in-progress/` | 3 | Service control, Update COM, CIM/WMI, RSAT ActiveDirectory | [docs/arch/work-in-progress.md](docs/arch/work-in-progress.md) |
@@ -35,7 +35,8 @@ made some of its changes. Assume partial application on failure unless the file 
 
 **`-WhatIf` support.** Four files declare `[CmdletBinding(SupportsShouldProcess)]`:
 `Add-GitKeep.ps1`, `Remove-OrphanedInstallerFile.ps1`, `SetupWindowsApps.ps1`, and
-`Disable-NonEssentialService.ps1` (plus `Move-SymbolicTarget` inside `SymbolicLinks.psm1`). Every
+`Disable-NonEssentialService.ps1` (plus `Move-SymbolicTarget` inside `SymbolicLinks.psm1` and `Stop-OllamaModel` inside
+`OllamaChat.psm1`). Every
 other Tier-3 script mutates immediately with no dry-run path. That asymmetry is the single most
 useful thing to know before running something here on a live machine.
 
@@ -44,13 +45,14 @@ useful thing to know before running something here on a live machine.
 **ActiveDirectory**. On a machine without RSAT these fail with a bare "term is not recognized"
 error that doesn't hint at the cause. Everything else runs on a stock Windows install.
 
-**Network egress.** Three endpoints total across the repo:
+**Network egress.** Four endpoints total across the repo:
 
 | Endpoint | Reached by | Note |
 |---|---|---|
 | `ipinfo.io` | `Get-MyPublicIP.ps1` | Third-party; discloses your IP to them by design. |
 | `axcientrestore.blob.core.windows.net` | `Download-Windows11ISO.ps1` | **Not a Microsoft endpoint.** See below. |
 | winget sources | `SetupWindowsApps.ps1` | Standard package manager traffic. |
+| Ollama server (`$env:OLLAMA_HOST`, default `127.0.0.1:11434`) | `Modules/ai/OllamaChat.psm1` | Caller-chosen. Plain HTTP by default — prompts, history, and `-ImagePath` file contents cross the wire unencrypted. |
 
 **Output convention.** Most functions return objects, not formatted text. Four exceptions:
 `Get-FolderStructure.ps1` and `work-in-progress/fs_tree_scanner.ps1` render ASCII trees, where the
@@ -60,7 +62,9 @@ its output unpipeable and is arguably a defect rather than a convention. Prefer 
 returns in anything new.
 
 **PowerShell version.** 5.1 baseline. `work-in-progress/fs_tree_scanner.ps1` intentionally requires
-7 and says so in a comment rather than a `#Requires` statement. **Four files are unintentionally
+7 and says so in a comment rather than a `#Requires` statement. `Modules/ai/OllamaChat.psm1`
+intentionally requires **7.4** and enforces it with `#Requires -Version 7.4` (`?.`, and the
+7.4-only `[NoRunspaceAffinity()]` class attribute). **Four files are unintentionally
 broken on 5.1** (they fail to parse, so nothing in them loads): `Invoke-StringScramble.ps1` and
 `SymbolicLinks.psm1` use PS7-only syntax, and `Get-FolderStructure.ps1` and `SetupWindowsApps.ps1`
 are UTF-8 without a BOM. Until fixed, they only work under pwsh 7. See `tasks/lessons.md`.

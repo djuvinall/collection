@@ -34,7 +34,8 @@ tell at a glance whether it's safe to run on a live machine.
 ## Stack
 
 - **Windows PowerShell 5.1** is the baseline target. Most utilities also run clean on PowerShell 7.
-- PS7-only scripts must say so — currently only `work-in-progress/fs_tree_scanner.ps1`.
+- PS7-only scripts must say so — currently `work-in-progress/fs_tree_scanner.ps1` and
+  `Modules/ai/OllamaChat.psm1` (`#Requires -Version 7.4`; CI parse-checks it under pwsh, not 5.1).
 - One Python file, `python/convert-har_to_csv.py`. It is not yet catalogued in `README.md` or
   mapped in `ARCHITECTURE.md`.
 - No external PowerShell modules are required *except* where explicitly noted: two scripts need
@@ -50,7 +51,7 @@ collection/
 ├── docs/arch/            System-surface detail, one file per area
 ├── palettes/             Color palettes / themes (JSON)
 ├── powershell/
-│   ├── Modules/          Reusable functions, grouped by domain (git, math, strings, utils)
+│   ├── Modules/          Reusable functions, grouped by domain (ai, git, math, strings, utils)
 │   ├── Scripts/          Standalone runnable scripts
 │   ├── functionSnippets/ Single-purpose snippets and drafts
 │   └── work-in-progress/ Incomplete / experimental — assume broken

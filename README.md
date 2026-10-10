@@ -11,7 +11,7 @@ collection/
 ├── css/                  Firefox UserChrome customization
 ├── palettes/             Color palettes / themes (JSON)
 ├── powershell/
-│   ├── Modules/          Reusable function libraries (git, math, strings, utils)
+│   ├── Modules/          Reusable function libraries (ai, git, math, strings, utils)
 │   ├── Scripts/          Standalone scripts
 │   ├── functionSnippets/ Reusable snippets & draft functions
 │   └── work-in-progress/ Incomplete / experimental
@@ -48,9 +48,16 @@ Several scripts mutate system state and require an elevated session or handle se
 - [`Remove-OrphanedInstallerFile.ps1`](powershell/Modules/utils/Remove-OrphanedInstallerFile.ps1) — deletes files from `C:\Windows\Installer`.
 - [`Test-Credential.ps1`](powershell/Modules/utils/Test-Credential.ps1) — handles credentials; treat inputs with care.
 - [`SymbolicLinks.psm1`](powershell/Modules/utils/SymbolicLinks.psm1) — requires elevation or Developer Mode to create links.
+- [`OllamaChat.psm1`](powershell/Modules/ai/OllamaChat.psm1) — sends prompts (and any `-ImagePath` files, base64-encoded) to an Ollama server over plain HTTP.
 - [`Start-InteractiveUpgrade.ps1`](powershell/functionSnippets/Start-InteractiveUpgrade.ps1) — registers a scheduled task.
 
 ## PowerShell contents
+
+### `powershell/Modules/ai/`
+
+| Script | Description | Notes |
+|---|---|---|
+| [`OllamaChat.psm1`](powershell/Modules/ai/OllamaChat.psm1) | Object-oriented client for the Ollama REST API: multi-turn chat sessions (`New-OllamaSession`, `Send-OllamaMessage`), one-off generate, embeddings, vision input, structured output, tool-call plumbing, and model listing / unloading. Server comes from `$env:OLLAMA_HOST` (same forms the Ollama CLI accepts), else `http://127.0.0.1:11434`; override with `Set-OllamaServer`. | **PowerShell 7.4+.** `Import-Module`. Network egress. |
 
 ### `powershell/Modules/git/`
 
