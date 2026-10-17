@@ -6,6 +6,22 @@ reasoning gets overruled by the next plausible-sounding idea.
 Seeded 2026-08-09 from the initial audit. These three are derived from defects found in the source,
 so they're real mistakes that were actually made here, not generic PowerShell advice.
 
+## 2026-09-29 — A pwsh 7 parse check is not a 5.1 gate
+
+**What happened:** the documented verification gate, run in pwsh 7, reported every file clean.
+Run in `powershell.exe` (5.1), four failed: `Invoke-StringScramble.ps1` (ternary `? :`),
+`SymbolicLinks.psm1` (`?.` — in a file that declares `#Requires -Version 5.1`),
+`Get-FolderStructure.ps1` and `SetupWindowsApps.ps1` (UTF-8 without BOM).
+
+**Why:** the parser is the host's parser. pwsh 7 knows PS7 syntax and defaults to UTF-8, so it
+accepts both. Windows PowerShell 5.1 has neither: it rejects the syntax, and it reads a BOM-less
+file as the ANSI code page, so an em dash becomes `â€"`, whose `”` (U+201D) PowerShell treats as a
+string delimiter — the error then points at an unrelated line.
+
+**Do instead:** parse-check with the runtime you're targeting (`powershell.exe` for 5.1). Save any
+PowerShell file containing non-ASCII as UTF-8 **with BOM**. `#Requires -Version 5.1` is a floor,
+not a check: it does not stop the file from using PS7 syntax.
+
 ## 2026-08-09 — A `#Requires` statement is silently ignored unless it starts its line
 
 **What happened:** `work-in-progress/Disable-NonEssentialService.ps1` line 1 is

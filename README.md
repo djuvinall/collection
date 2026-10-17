@@ -128,7 +128,7 @@ Color palettes / themes, stored as JSON — either sampled from real sources or 
 | File | Description |
 |---|---|
 | [`palettes/ereader-amber-dark.json`](palettes/ereader-amber-dark.json) | Amber-on-black palette sampled from an e-reader screenshot (10775.jpg, 1080x2340). Body text / chrome / secondary / label tones, plus derived panel and rule colors. |
-| [`palettes/kosh-dark.json`](palettes/kosh-dark.json) | Dark navy/blue-toned UI palette — primary/surface/text/border/status color groups. |
+| [`palettes/navy-dark.json`](palettes/navy-dark.json) | Dark navy/blue-toned UI palette — primary/surface/text/border/status color groups. |
 
 ## Test
 

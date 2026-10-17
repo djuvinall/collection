@@ -59,8 +59,11 @@ formatting *is* the output; `Start-Stopwatch.ps1` writes to the console by natur
 its output unpipeable and is arguably a defect rather than a convention. Prefer `[PSCustomObject]`
 returns in anything new.
 
-**PowerShell version.** 5.1 baseline throughout. Only `work-in-progress/fs_tree_scanner.ps1`
-requires 7, and it says so in a comment rather than a `#Requires` statement.
+**PowerShell version.** 5.1 baseline. `work-in-progress/fs_tree_scanner.ps1` intentionally requires
+7 and says so in a comment rather than a `#Requires` statement. **Four files are unintentionally
+broken on 5.1** (they fail to parse, so nothing in them loads): `Invoke-StringScramble.ps1` and
+`SymbolicLinks.psm1` use PS7-only syntax, and `Get-FolderStructure.ps1` and `SetupWindowsApps.ps1`
+are UTF-8 without a BOM. Until fixed, they only work under pwsh 7. See `tasks/lessons.md`.
 
 ## Boundaries that matter
 

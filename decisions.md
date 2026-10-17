@@ -8,6 +8,44 @@ the reasoning is inferred rather than stated in the commit message, it says so.
 
 ---
 
+## 2026-09-29 — Default branch renamed `Version-0.00` → `main`; work moves to issues and PRs
+
+**Context:** every change so far was committed straight to `Version-0.00`, a name that implied a
+versioning scheme the repo explicitly doesn't have (see Out of scope in `CLAUDE.md`). Planning lived
+in `tasks/todo.md` with no way to link work to the commits that did it.
+
+**Decision:** rename the default branch to `main` (GitHub redirects the old name). `main` changes
+only by rebase-merging a PR from a `<type>/<issue>-<slug>` branch; local hooks in `.githooks/`
+refuse direct commits and pushes to `main` and enforce Conventional Commits with a body. Work is
+tracked as GitHub issues.
+
+**Alternatives:** keep `Version-0.00` (rejected — misleading name, and tooling assumes `main`);
+branch protection rulesets instead of hooks (rejected — hooks run before the mistake reaches
+GitHub, and work the same on every clone that sets `core.hooksPath`).
+
+**Consequences:** existing clones need `git branch -m Version-0.00 main`, `git fetch --prune`,
+`git branch -u origin/main main` and `git remote set-head origin -a` — the hooks read the default
+branch from `origin/HEAD`, so skipping the last step leaves them guarding the old name. History was
+**not** rewritten: old commit messages stay as they are.
+
+## 2026-09-29 — Label-gated CI added, reversing "No CI"
+
+**Context:** the manual verification gate was documented as a pwsh parse check. Run under Windows
+PowerShell 5.1 — the actual baseline — 4 of 29 files fail to parse (two use PS7-only syntax, two
+are UTF-8 without a BOM). pwsh 7 accepts all four, so the manual gate as written could never have
+caught them.
+
+**Decision:** one workflow, `.github/workflows/ci.yml`, on `windows-latest` with `shell: powershell`
+(5.1), parse-checking every `.ps1`/`.psm1`. It runs only on non-draft PRs labelled `ci`, or by
+hand; pushes and merges run nothing.
+
+**Alternatives:** keep CI out and fix the manual instruction only (rejected — the manual gate is
+the one that already failed silently); an ubuntu runner with pwsh (rejected — it runs the parser
+that misses exactly these failures).
+
+**Consequences:** "No CI" in `CLAUDE.md` Out of scope is narrowed to "no CI beyond this check".
+Public repo, so Actions minutes are free; the label gate still keeps runs deliberate.
+
 ## 2026-08-09 — `ARCHITECTURE.md` organized by blast radius, not by folder contents
 
 **Context:** `README.md` already catalogs every script with a plain-language description. A

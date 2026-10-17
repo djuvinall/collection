@@ -66,8 +66,8 @@ ranges, tenant IDs, and usernames removed and genericized. The repo is public un
 so scrubbing is the mandatory bar for anything work-derived, not a nicety.
 
 **Friends & Family** — Devon's side IT-support work. Several `utils/` scripts (browser-extension
-audit, credential testing, orphaned-installer cleanup) were written for it. Distinct from Kosh
-Solutions MSP work, though scripts flow between both.
+audit, credential testing, orphaned-installer cleanup) were written for it. Distinct from day-job
+MSP work, though scripts flow between both.
 
 **ASIO** — ConnectWise ASIO, the RMM platform used at work. `BrowserExtensionsAudit.ps1` emits
 structured output shaped for ingestion into it. Explains why that script returns objects rather
